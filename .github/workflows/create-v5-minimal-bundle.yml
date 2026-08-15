@@ -1,0 +1,51 @@
+name: Create V5 minimal data bundle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/create-v5-minimal-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build minimal analysis bundle
+        run: |
+          set -euo pipefail
+          rm -rf bundle_minimal minimal_v5
+          mkdir -p bundle_minimal minimal_v5
+          python - <<'PY'
+          import glob, json
+          import pandas as pd
+          files = sorted(glob.glob('staged/spain_energy_2017_*.csv'))
+          df = pd.concat([pd.read_csv(p) for p in files], ignore_index=True)
+          keep = ['timestamp_utc','price_day_ahead_eur_per_mwh','price_actual_eur_per_mwh','wind_onshore_mw','solar_mw','system_load_mw']
+          df[keep].to_csv('minimal_v5/spain_energy_price_2017.csv', index=False)
+          PY
+          cp staged/ecb_usd_per_eur_2017.csv minimal_v5/
+          cp staged/mbta_schedule_derived_hydrogen_demand.csv minimal_v5/
+          cp staged/trimet_schedule_derived_hydrogen_demand.csv minimal_v5/
+          cp staged/cta_schedule_derived_hydrogen_demand.csv minimal_v5/
+          cp staged/manifest.json minimal_v5/
+          tar -czf bundle_minimal/v5_minimal_data.tar.gz minimal_v5
+          base64 -w 6000 bundle_minimal/v5_minimal_data.tar.gz > bundle_minimal/v5_minimal_data_wrapped.b64
+          wc -l bundle_minimal/v5_minimal_data_wrapped.b64 > bundle_minimal/v5_minimal_data_wrapped.lines.txt
+          sha256sum bundle_minimal/v5_minimal_data.tar.gz > bundle_minimal/v5_minimal_data.tar.gz.sha256
+          sha256sum bundle_minimal/v5_minimal_data_wrapped.b64 > bundle_minimal/v5_minimal_data_wrapped.b64.sha256
+          ls -lh bundle_minimal/*
+      - name: Commit minimal bundle
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_minimal
+          if git diff --cached --quiet; then
+            echo 'No changes'
+          else
+            git commit -m 'Add V5 minimal staged data bundle'
+            git push
+          fi
