@@ -1,0 +1,92 @@
+name: Create V5 compact payload
+
+on:
+  push:
+    paths:
+      - '.github/workflows/create-v5-compact-payload.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create compact quantized payload
+        run: |
+          set -euo pipefail
+          rm -rf bundle_compact
+          mkdir -p bundle_compact
+          python - <<'PY'
+          import base64, csv, glob, gzip, hashlib, json, textwrap
+          from pathlib import Path
+
+          payload = {
+              'schema': 'v5_compact_payload_v1',
+              'price_start_utc': '2017-01-01 00:00:00+00:00',
+              'price_frequency_h': 1,
+              'price_scale': {'eur_per_mwh_x100': 100, 'power_mw_x1': 1},
+              'prices': [],
+              'fx': [],
+              'sites': {},
+          }
+          for path in sorted(glob.glob('staged/spain_energy_2017_*.csv')):
+              with open(path, newline='', encoding='utf-8') as f:
+                  for row in csv.DictReader(f):
+                      payload['prices'].append([
+                          int(round(float(row['price_day_ahead_eur_per_mwh'])*100)),
+                          int(round(float(row['price_actual_eur_per_mwh'])*100)),
+                          int(round(float(row['wind_onshore_mw']))),
+                          int(round(float(row['solar_mw']))),
+                          int(round(float(row['system_load_mw']))),
+                      ])
+          with open('staged/ecb_usd_per_eur_2017.csv', newline='', encoding='utf-8') as f:
+              for row in csv.DictReader(f):
+                  date = row.get('date') or row.get('TIME_PERIOD') or row.get('time_period')
+                  rate_key = next(k for k in row if 'usd' in k.lower() and 'eur' in k.lower())
+                  payload['fx'].append([date, int(round(float(row[rate_key])*1_000_000))])
+          for site in ('mbta','trimet','cta'):
+              path = f'staged/{site}_schedule_derived_hydrogen_demand.csv'
+              rows=[]
+              start=None
+              with open(path, newline='', encoding='utf-8') as f:
+                  for row in csv.DictReader(f):
+                      if start is None: start=row['timestamp_local']
+                      rows.append([
+                          int(round(float(row['demand_LD_kg'])*1000)),
+                          int(round(float(row['demand_MD_kg'])*1000)),
+                          int(round(float(row['demand_HD_kg'])*1000)),
+                      ])
+              payload['sites'][site] = {'start_local': start, 'frequency_h': 1, 'demand_kg_x1000': rows}
+          raw = json.dumps(payload, separators=(',',':')).encode()
+          comp = gzip.compress(raw, compresslevel=9, mtime=0)
+          b85 = base64.b85encode(comp).decode('ascii')
+          wrapped='\n'.join(textwrap.wrap(b85, 7000))+'\n'
+          Path('bundle_compact/v5_payload.b85').write_text(wrapped, encoding='ascii')
+          meta={
+              'raw_json_bytes':len(raw),
+              'gzip_bytes':len(comp),
+              'base85_chars':len(b85),
+              'lines':len(wrapped.splitlines()),
+              'gzip_sha256':hashlib.sha256(comp).hexdigest(),
+              'payload_sha256':hashlib.sha256(raw).hexdigest(),
+              'price_rows':len(payload['prices']),
+              'fx_rows':len(payload['fx']),
+              'sites':{k:len(v['demand_kg_x1000']) for k,v in payload['sites'].items()},
+          }
+          Path('bundle_compact/v5_payload_meta.json').write_text(json.dumps(meta, indent=2), encoding='utf-8')
+          PY
+          ls -lh bundle_compact/*
+      - name: Commit compact payload
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_compact
+          if git diff --cached --quiet; then
+            echo 'No changes'
+          else
+            git commit -m 'Add compact V5 public-data payload'
+            git push
+          fi
