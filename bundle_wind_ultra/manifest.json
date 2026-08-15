@@ -1,0 +1,9 @@
+{
+  "npz_size_bytes": 16357,
+  "npz_sha256": "ed4bca4525639bac9abd133e2b84454d6c6935bbf30b6fc620981a08c98496f4",
+  "base64_lines": 287,
+  "rows": 8760,
+  "start_utc": "2017-01-01 00:00:00+00:00",
+  "end_utc": "2017-12-31 23:00:00+00:00",
+  "source": "staged Spain energy 2017 dataset"
+}
