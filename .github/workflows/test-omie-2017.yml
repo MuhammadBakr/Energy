@@ -1,0 +1,30 @@
+name: Test OMIE 2017 historical file
+
+on:
+  push:
+    paths:
+      - '.github/workflows/test-omie-2017.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download one official OMIE day
+        run: |
+          set -euxo pipefail
+          mkdir -p staged
+          URL='https://www.omie.es/sites/default/files/dados/AGNO_2017/MES_01/TXT/INT_PBC_EV_H_1_01_01_2017_01_01_2017.TXT'
+          curl -L --fail --retry 3 "$URL" -o staged/omie_2017_01_01.txt
+          wc -c staged/omie_2017_01_01.txt
+          head -10 staged/omie_2017_01_01.txt
+      - name: Commit sample
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add staged/omie_2017_01_01.txt
+          if git diff --cached --quiet; then echo 'No changes'; else git commit -m 'Add official OMIE 2017 sample'; git push; fi
