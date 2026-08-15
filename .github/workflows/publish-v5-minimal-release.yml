@@ -1,0 +1,28 @@
+name: Publish V5 minimal data release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v5-minimal-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish or update release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG=v5-public-data-2026-08-15
+          ASSET=bundle_minimal_v2/v5_minimal_data.tar.gz
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" --title "V5 public data bundle" --notes "Timestamped Spanish price data, ECB exchange rates, and official-schedule-derived multi-site hydrogen-demand profiles for the Energy-targeted V5 study."
+          fi
