@@ -1,0 +1,51 @@
+name: Create V5 full-year wind ultra bundle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/create-v5-wind-ultra.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install numpy pandas
+      - name: Build full-year wind array
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, json, textwrap
+          import numpy as np
+          import pandas as pd
+          root=Path('.')
+          energy=pd.concat([pd.read_csv(root/f'staged/spain_energy_2017_{m:02d}.csv') for m in range(1,13)],ignore_index=True)
+          energy['timestamp_utc']=pd.to_datetime(energy['timestamp_utc'],utc=True)
+          energy=energy.sort_values('timestamp_utc').drop_duplicates('timestamp_utc')
+          if len(energy)!=8760:
+              raise SystemExit(f'expected 8760 rows, got {len(energy)}')
+          wind=np.rint(energy['wind_onshore_mw'].fillna(0).clip(lower=0)).astype(np.uint16).to_numpy()
+          out=root/'bundle_wind_ultra'
+          out.mkdir(exist_ok=True)
+          np.savez_compressed(out/'v5_wind_2017.npz',wind_onshore_mw=wind)
+          raw=(out/'v5_wind_2017.npz').read_bytes()
+          b64=base64.b64encode(raw).decode('ascii')
+          (out/'v5_wind_2017.b64').write_text('\n'.join(textwrap.wrap(b64,76))+'\n')
+          meta={'npz_size_bytes':len(raw),'npz_sha256':hashlib.sha256(raw).hexdigest(),'base64_lines':len(textwrap.wrap(b64,76)),'rows':len(wind),'start_utc':str(energy['timestamp_utc'].iloc[0]),'end_utc':str(energy['timestamp_utc'].iloc[-1]),'source':'staged Spain energy 2017 dataset'}
+          (out/'manifest.json').write_text(json.dumps(meta,indent=2))
+          print(json.dumps(meta,indent=2))
+          PY
+      - name: Commit bundle
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_wind_ultra/
+          if git diff --cached --quiet; then echo 'No changes'; else git commit -m 'Add V5 full-year wind ultra bundle'; git push; fi
