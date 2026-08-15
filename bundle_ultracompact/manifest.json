@@ -1,0 +1,29 @@
+{
+  "npz_size_bytes": 18787,
+  "npz_sha256": "a9a3561fc76c98490ebe878d42ef3c68051a55cc89c6158992617af796a7f132",
+  "base64_lines": 330,
+  "energy_start_utc": "2017-01-01T00:00:00Z",
+  "energy_rows": 8760,
+  "price_scale_eur_per_mwh": 0.01,
+  "fx_start_date": "2017-01-01",
+  "fx_rows": 365,
+  "fx_scale_usd_per_eur": 1e-06,
+  "sites": {
+    "mbta": {
+      "start_local": "2026-08-07 00:00:00",
+      "rows": 720,
+      "quantization_kg": 0.1
+    },
+    "trimet": {
+      "start_local": "2026-07-19 00:00:00",
+      "rows": 2016,
+      "quantization_kg": 0.1
+    },
+    "cta": {
+      "start_local": "2026-08-05 00:00:00",
+      "rows": 2016,
+      "quantization_kg": 0.1
+    }
+  },
+  "source_manifest": "staged/manifest.json"
+}
