@@ -1,0 +1,49 @@
+name: Bundle V5 staged data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bundle-v5-data.yml'
+      - 'TRIGGER_V5_BUNDLE'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build compact transfer bundle
+        run: |
+          set -euo pipefail
+          rm -rf bundle
+          mkdir -p bundle/tmp
+          cp staged/manifest.json bundle/tmp/
+          cp staged/ecb_usd_per_eur_2017.csv bundle/tmp/
+          cp staged/spain_energy_2017_*.csv bundle/tmp/
+          cp staged/*_schedule_derived_hydrogen_demand.csv bundle/tmp/
+          cp scripts/stage_v5_data.py bundle/tmp/
+          tar -C bundle/tmp -czf bundle/v5_staged_data.tar.gz .
+          base64 -w 40000 bundle/v5_staged_data.tar.gz > bundle/all.b64
+          split -d -a 3 -l 1 bundle/all.b64 bundle/part_
+          rm bundle/all.b64
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          b=Path('bundle/v5_staged_data.tar.gz')
+          parts=sorted(Path('bundle').glob('part_*'))
+          payload={'tar_sha256':hashlib.sha256(b.read_bytes()).hexdigest(),'tar_bytes':b.stat().st_size,'parts':[{'name':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'chars':len(p.read_text())} for p in parts]}
+          Path('bundle/index.json').write_text(json.dumps(payload,indent=2))
+          PY
+          rm -rf bundle/tmp
+      - name: Commit transfer bundle
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle
+          git commit -m 'Bundle V5 staged public data for reproducible transfer' || exit 0
+          git push
