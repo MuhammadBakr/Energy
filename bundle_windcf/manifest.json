@@ -1,0 +1,9 @@
+{
+  "npz_size_bytes": 8390,
+  "npz_sha256": "0145f35e70bfc06f5b06dd239dee49ca992c3ce545d4205eafe06f8f8238703c",
+  "base64_lines": 148,
+  "rows": 8760,
+  "start_utc": "2017-01-01T00:00:00Z",
+  "normalization_mw_p995": 14124.279999999999,
+  "quantization_cf": 0.00392156862745098
+}
