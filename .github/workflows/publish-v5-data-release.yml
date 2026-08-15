@@ -1,0 +1,29 @@
+name: Publish V5 staged data release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v5-data-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create or update release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='v5-data-staging-2026-08-15'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" bundle/v5_staged_data.tar.gz --clobber
+          else
+            gh release create "$tag" bundle/v5_staged_data.tar.gz \
+              --title 'V5 public-data staging bundle' \
+              --notes 'Timestamped Spain energy-price data, ECB exchange rates, and official-schedule-derived mobility demand prepared for the Energy-targeted Revision V5.'
+          fi
