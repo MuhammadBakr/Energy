@@ -1,0 +1,38 @@
+name: Create windcf chunk hashes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/create-windcf-chunk-hashes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Hash line groups
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path('bundle_windcf/v5_windcf.b64')
+          lines=p.read_text().splitlines()
+          groups=[]
+          for start in range(0,len(lines),10):
+              text='\n'.join(lines[start:start+10])+'\n'
+              groups.append({'start':start+1,'end':min(start+10,len(lines)),'sha256':hashlib.sha256(text.encode()).hexdigest()})
+          Path('bundle_windcf/chunk_hashes.json').write_text(json.dumps({'lines':len(lines),'groups':groups},indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_windcf/chunk_hashes.json
+          if git diff --cached --quiet; then echo 'No changes'; else git commit -m 'Add windcf transport chunk hashes'; git push; fi
