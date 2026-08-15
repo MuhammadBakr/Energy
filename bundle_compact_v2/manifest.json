@@ -1,0 +1,12 @@
+{
+  "npz_size_bytes": 150738,
+  "npz_sha256": "5409d6c422915cd1999d71661d2684630ee12bb611c0dcf2f4ddf8cf65f7c55e",
+  "base64_lines": 2645,
+  "energy_rows": 8760,
+  "site_rows": {
+    "mbta": 720,
+    "trimet": 2016,
+    "cta": 2016
+  },
+  "source_manifest": "staged/manifest.json"
+}
