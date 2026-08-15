@@ -1,0 +1,41 @@
+{
+  "tar_sha256": "7711544c3a1406d8f0ebad747a9342bac272302ec167a8dacf976d99f8b48cc5",
+  "tar_bytes": 187870,
+  "parts": [
+    {
+      "name": "part_000",
+      "sha256": "1effc2570a8633ef6a068e14e79fea59cad62d71a32c13c48105ef69020376cf",
+      "chars": 40001
+    },
+    {
+      "name": "part_001",
+      "sha256": "07e6e1fdda8a180faed7cd2c555491374a84007f4a7f89ed4073d49ce234c868",
+      "chars": 40001
+    },
+    {
+      "name": "part_002",
+      "sha256": "2dc85aa3efa955bc0d115f8ea0699a90d41ca4eff1c8f248763533dde91f076f",
+      "chars": 40001
+    },
+    {
+      "name": "part_003",
+      "sha256": "8dc43c2791759d798260c0445d86f08b13ec648a89774bbc2ab200b3433b06a5",
+      "chars": 40001
+    },
+    {
+      "name": "part_004",
+      "sha256": "985fce9d93388b9a9f8f339a618234b86035af7f2a6b4fec06a909223a5876dd",
+      "chars": 40001
+    },
+    {
+      "name": "part_005",
+      "sha256": "8bab4ba9750c21e8618b853a07214d898ec394f0db1ce3475fbb1ef5c8333251",
+      "chars": 40001
+    },
+    {
+      "name": "part_006",
+      "sha256": "568dec16830f730289581703a7f2be61ccdd888e267efcebd5b940758506935d",
+      "chars": 10497
+    }
+  ]
+}
