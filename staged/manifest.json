@@ -1,0 +1,149 @@
+{
+  "energy": {
+    "source_url": "https://raw.githubusercontent.com/LuvU3OOO/EneryConsumptionForecast/9a8a7792d3476428be68eb5936f2d7ec018c1ae4/energy_dataset.csv",
+    "raw_sha256": "14cd13e020d87af0ab49db8e0f1e4d308320ec5b8d2dec23bab4d27c75c7733a",
+    "rows": 8760,
+    "start": "2017-01-01 00:00:00+00:00",
+    "end": "2017-12-31 23:00:00+00:00",
+    "outputs": [
+      {
+        "path": "staged/spain_energy_2017_01.csv",
+        "sha256": "7f84f1b92ab28ba0b731ac004e5706edb0c7115eccee37b0f66ab321c5fc5871",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_02.csv",
+        "sha256": "8766361e947ee66a93dce4656d3876b07672f0fa6b418c233ab7f9c15342b804",
+        "rows": 672
+      },
+      {
+        "path": "staged/spain_energy_2017_03.csv",
+        "sha256": "1a2731353117d03961ac5bdb65f05ef1406ce5fbc7e3ab97625aab17a7319209",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_04.csv",
+        "sha256": "9d4ab3007c5655f2544ddbfb84233afe5c5943d6f97f63f14ca8b0b41972b8e8",
+        "rows": 720
+      },
+      {
+        "path": "staged/spain_energy_2017_05.csv",
+        "sha256": "57313987d832a8cf183b62ee64fee3c7675a0381623b5e60073e931b47d9a260",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_06.csv",
+        "sha256": "b16a840479b16167d2ec9196cc6e34bd817f748dc7a5da643c0123a02fdaba38",
+        "rows": 720
+      },
+      {
+        "path": "staged/spain_energy_2017_07.csv",
+        "sha256": "4cb679c8681f3cb3cabf038b7cade262dcb4682eb130dc0a027818be7eb17e65",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_08.csv",
+        "sha256": "5f3fbaca9079a4145d4cf6328776a5d7d0e870269dc7c9a10e4100968f7ef7e5",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_09.csv",
+        "sha256": "92f5bb33b04a604608c103706eccfcb5607cbd1f9f9c8a449ff13963818bfbb7",
+        "rows": 720
+      },
+      {
+        "path": "staged/spain_energy_2017_10.csv",
+        "sha256": "91f2c7539293673fbcfe0bca4555e6ddfa3886fd6e0854c34401d3458ce6f776",
+        "rows": 744
+      },
+      {
+        "path": "staged/spain_energy_2017_11.csv",
+        "sha256": "93da539f6b63f8c2bcb0cda1497e38054f17401eff7276661f08ccb8439dd0aa",
+        "rows": 720
+      },
+      {
+        "path": "staged/spain_energy_2017_12.csv",
+        "sha256": "400fd450f866887c230e467d89b1770387804cb5234687c6946c62e7fdaee6f6",
+        "rows": 744
+      }
+    ]
+  },
+  "ecb": {
+    "source_url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?startPeriod=2017-01-01&endPeriod=2017-12-31&format=csvdata",
+    "raw_sha256": "3f19abceef07982e91817cf94071c5f0714f7ea3c5d19aa37727aef1136006ff",
+    "rows": 255,
+    "mean_usd_per_eur": 1.1296811764705883,
+    "output": {
+      "path": "staged/ecb_usd_per_eur_2017.csv",
+      "sha256": "861617fffaf1895469363cadfa2e10522901ea901a9b4dec52ce80d25cb26c67"
+    }
+  },
+  "gtfs": [
+    {
+      "site": "mbta",
+      "source_url": "https://cdn.mbta.com/MBTA_GTFS.zip",
+      "raw_sha256": "d72648a6bbfb8af0a49fb0d373b17e3f0135c70b4a62182de7fb1f3415493739",
+      "service_start": "2026-08-07",
+      "service_end": "2026-09-05",
+      "bus_routes": 369,
+      "vehicle_blocks": 66068,
+      "total_distance_km": 3271848.9408302633,
+      "total_hydrogen_kg": 256709.5886783838,
+      "output": {
+        "path": "staged/mbta_schedule_derived_hydrogen_demand.csv",
+        "sha256": "53700a371df767600c442ed6363e72ca9f0299de97da50787f21170e0dbce076",
+        "rows": 720
+      },
+      "blocks": {
+        "path": "staged/mbta_vehicle_blocks.csv",
+        "sha256": "d45516847926b7348e2ccb4768147a5eed5d5a6e9adeab0ad4bb199b8e8e7493",
+        "rows": 66068
+      },
+      "evidence_class": "OFFICIAL_GTFS_SCHEDULE_DERIVED_MODEL_CALIBRATED_HYDROGEN_DEMAND"
+    },
+    {
+      "site": "trimet",
+      "source_url": "https://developer.trimet.org/schedule/gtfs.zip",
+      "raw_sha256": "339ad8ababa0b36248dba386dfa2d6f566c1e03adf99101f0a80ec40656a5d09",
+      "service_start": "2026-07-19",
+      "service_end": "2026-10-10",
+      "bus_routes": 100,
+      "vehicle_blocks": 56797,
+      "total_distance_km": 7685046.475291576,
+      "total_hydrogen_kg": 683488.2428963241,
+      "output": {
+        "path": "staged/trimet_schedule_derived_hydrogen_demand.csv",
+        "sha256": "331c3d3cb065a2bb0197322201f391f26ca247699b05d2a426bb1ee850dcc5c5",
+        "rows": 2016
+      },
+      "blocks": {
+        "path": "staged/trimet_vehicle_blocks.csv",
+        "sha256": "a6c0fc87a38f2e5ca901626776d9ee7a444af3bf299078aaa1539a94b6470d12",
+        "rows": 56797
+      },
+      "evidence_class": "OFFICIAL_GTFS_SCHEDULE_DERIVED_MODEL_CALIBRATED_HYDROGEN_DEMAND"
+    },
+    {
+      "site": "cta",
+      "source_url": "https://www.transitchicago.com/downloads/sch_data/google_transit.zip",
+      "raw_sha256": "31300c36442ef36ccd06def27a6c7d07582d4cbc688cae984cb86f8ef3218bed",
+      "service_start": "2026-08-05",
+      "service_end": "2026-10-27",
+      "bus_routes": 125,
+      "vehicle_blocks": 197164,
+      "total_distance_km": 22037972.852584578,
+      "total_hydrogen_kg": 1953851.8856500364,
+      "output": {
+        "path": "staged/cta_schedule_derived_hydrogen_demand.csv",
+        "sha256": "41c0897fedaf416277c4beb892135ce4c9dd02e4a8dd94995601a572e6c4d1ba",
+        "rows": 2016
+      },
+      "blocks": {
+        "path": "staged/cta_vehicle_blocks.csv",
+        "sha256": "bb43c1a3c1871833c02139d960ef1ca4b6dee99995e8b09e18ea14356fe903f1",
+        "rows": 197164
+      },
+      "evidence_class": "OFFICIAL_GTFS_SCHEDULE_DERIVED_MODEL_CALIBRATED_HYDROGEN_DEMAND"
+    }
+  ]
+}
