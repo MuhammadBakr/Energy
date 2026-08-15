@@ -1,0 +1,63 @@
+name: Bundle V5 staged data in small chunks
+
+on:
+  push:
+    paths:
+      - '.github/workflows/bundle-v5-data-small.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundle-small:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create small base64 chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f bundle/v5_staged_data.tar.gz
+          rm -rf bundle_small
+          mkdir -p bundle_small
+          base64 -w 0 bundle/v5_staged_data.tar.gz > bundle_small/bundle.b64
+          split -b 8000 -d -a 3 bundle_small/bundle.b64 bundle_small/part_
+          rm bundle_small/bundle.b64
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('bundle_small')
+          parts = sorted(root.glob('part_*'))
+          archive = Path('bundle/v5_staged_data.tar.gz')
+          payload = {
+              'archive': str(archive),
+              'archive_size': archive.stat().st_size,
+              'archive_sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
+              'part_size_chars': 8000,
+              'parts': [
+                  {
+                      'name': p.name,
+                      'size': p.stat().st_size,
+                      'sha256': hashlib.sha256(p.read_bytes()).hexdigest(),
+                  }
+                  for p in parts
+              ],
+          }
+          (root / 'index.json').write_text(json.dumps(payload, indent=2), encoding='utf-8')
+          PY
+      - name: Commit small chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_small
+          if git diff --cached --quiet; then
+            echo 'No bundle changes.'
+          else
+            git commit -m 'Add small-chunk V5 staged-data bundle'
+            git push
+          fi
