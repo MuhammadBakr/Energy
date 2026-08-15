@@ -1,0 +1,39 @@
+name: Split V5 ultracompact transport
+
+on:
+  push:
+    paths:
+      - '.github/workflows/split-v5-ultracompact.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Split and hash
+        run: |
+          set -euo pipefail
+          rm -rf bundle_ultrachunks
+          mkdir -p bundle_ultrachunks
+          split -l 40 -d -a 2 bundle_ultracompact/v5_ultracompact.b64 bundle_ultrachunks/part_
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          d=Path('bundle_ultrachunks')
+          parts=[]
+          for p in sorted(d.glob('part_*')):
+              raw=p.read_bytes()
+              parts.append({'name':p.name,'bytes':len(raw),'lines':len(raw.splitlines()),'sha256':hashlib.sha256(raw).hexdigest()})
+          (d/'manifest.json').write_text(json.dumps({'parts':parts},indent=2))
+          print(json.dumps(parts,indent=2))
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bundle_ultrachunks/
+          if git diff --cached --quiet; then echo 'No changes'; else git commit -m 'Add split V5 ultracompact transport'; git push; fi
